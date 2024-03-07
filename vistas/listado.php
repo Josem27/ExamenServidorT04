@@ -25,7 +25,7 @@
                     <th>Descripción</th>
                     <th>Fecha</th>
                     <th>Nick</th>
-                    <th>Prioridad</th> <!-- Add this -->
+                    <th>Prioridad</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -37,7 +37,7 @@
                         <td><?= substr($datos['descripcion'], 0, 45) . (strlen($datos['descripcion']) > 45 ? '...' : '') ?></td>
                         <td><?= $datos['fecha'] ?></td>
                         <td><?= $datos['nick'] ?></td>
-                        <td><?= $datos['prioridad'] ?></td> <!-- Add this -->
+                        <td><?= $datos['prioridad'] ?></td>
                         <td>
                             <?php if ($_SESSION['esAdmin']): ?>
                                 <div class="btn-group" role="group">

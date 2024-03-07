@@ -1,5 +1,6 @@
 <?php
-class modelo{
+class modelo
+{
     private $conexion;
     private $host = "localhost";
     private $user = "root";
@@ -7,101 +8,103 @@ class modelo{
     private $db = "dbblog";
 
     //Constructor que inicializa la conexion
-    public function __construct(){
-        $this ->conectar();
+    public function __construct()
+    {
+        $this->conectar();
     }
 
     //Funcion para conectar la base de datos
-    public function conectar(){
-        try{
-            $this->conexion = new PDO("mysql:host=$this->host;dbname=$this->db", $this->user,$this->pass);
+    public function conectar()
+    {
+        try {
+            $this->conexion = new PDO("mysql:host=$this->host;dbname=$this->db", $this->user, $this->pass);
             $this->conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             return TRUE;
-        }catch(PDOException $e){
+        } catch (PDOException $e) {
             return $e->getMessage();
         }
     }
 
-    public function listado(){
+    public function listado()
+    {
         $result = [
             "datos" => null,
             "mensaje" => null,
             "bool" => false
         ];
-    
+
         $page = 0;
         $longitudPag = 3;
-        
-        if(isset($_GET['page']) && is_numeric($_GET['page'])){
+
+        if (isset($_GET['page']) && is_numeric($_GET['page'])) {
             $page = $_GET['page'];
         }
         $offset = $page * $longitudPag;
-    
-        try{   
+
+        try {
             $sql = "SELECT tareas.*, usuarios.*, categorias.*, tareas.prioridad 
                     FROM (tareas 
                     LEFT JOIN usuarios ON usuarios.id = tareas.usuario_id) 
                     LEFT JOIN categorias ON categorias.id = tareas.categoria_id 
                     LIMIT $longitudPag OFFSET $offset";
-            
+
             $resultquery = $this->conexion->query($sql);
-            
-            if($resultquery){
+
+            if ($resultquery) {
                 $result['bool'] = true;
                 $result['datos'] = $resultquery->fetchAll(PDO::FETCH_ASSOC);
             }
-    
+
             $listCount = $this->conexion->query("SELECT COUNT(*) FROM tareas")->fetch()[0];
-            
-            if($page > ($listCount / $longitudPag)){
+
+            if ($page > ($listCount / $longitudPag)) {
                 $page = 0;
             }
-            
+
             $result['paginas'] = $listCount;
             $result['offset'] = $offset;
             $result['longitudPag'] = $longitudPag;
-    
-        } catch(PDOException $e){
+        } catch (PDOException $e) {
             $result['mensaje'] = $e->getMessage();
         }
-        
+
         return $result;
     }
-    
 
-
-    public function comprobarUser(){
+    public function comprobarUser()
+    {
         $result = [
             "datos" => null,
             "mensaje" => null,
             "bool" => false
         ];
 
-        try{
+        try {
             $sql = "SELECT * FROM usuarios";
             $resultquery = $this->conexion->query($sql);
-            if($resultquery){
+            if ($resultquery) {
                 $result['bool'] = true;
                 $result['datos'] = $resultquery->fetchAll(PDO::FETCH_ASSOC);
             }
-        }catch(PDOException $e){
+        } catch (PDOException $e) {
             $result['mensaje'] = $e->getMessage();
         }
         return $result;
     }
 
-    public function nuevaEntrada($datos){
+    public function nuevaEntrada($datos)
+    {
         $result = [
             "bool" => false,
             "error" => null
         ];
-    
-        try{
+
+        try {
             $sql = "INSERT INTO tareas(usuario_id, categoria_id, titulo, imagen, descripcion, fecha, prioridad) 
                     VALUES (:usuario_id, :categoria_id, :titulo, :imagen, :descripcion, :fecha, :prioridad)";
-    
+
             $query = $this->conexion->prepare($sql);
-    
+
             $query->execute([
                 'usuario_id' => $datos['usuario_id'],
                 'categoria_id' => $datos['categoria_id'],
@@ -111,128 +114,125 @@ class modelo{
                 'fecha' => $datos['fecha'],
                 'prioridad' => $datos['prioridad']
             ]);
-    
-            if($query){
+
+            if ($query) {
                 $result['bool'] = true;
             }
-        } catch(PDOException $e){
+        } catch (PDOException $e) {
             $result['error'] = $e->getMessage();
         }
-        
+
         return $result;
     }
-    
 
-    public function idCat(){
-        $result =[
+    public function idCat()
+    {
+        $result = [
             "datos" => null,
             "mensaje" => null,
             "bool" => false,
         ];
 
-        try{
+        try {
             $sql = "SELECT * FROM categorias";
             $resultquery = $this->conexion->query($sql);
-            if($resultquery){
+            if ($resultquery) {
                 $result['bool'] = true;
                 $result['datos'] = $resultquery->fetchAll(PDO::FETCH_ASSOC);
             }
-        }catch(PDOException $e){
-            $result['mensaje']= $e->getMessage();
+        } catch (PDOException $e) {
+            $result['mensaje'] = $e->getMessage();
         }
         return $result;
     }
 
-    public function registrarLog($datos){
+    public function registrarLog($datos)
+    {
         $result = [
-            'bool'=> false,
+            'bool' => false,
             'error' => null
         ];
-        try{
+        try {
             $sql = "INSERT INTO logs(usuario,operacion) VALUES(:usuario,:operacion)";
             $query = $this->conexion->prepare($sql);
-            $query -> execute([
+            $query->execute([
                 'usuario' => $datos['usuario'],
                 'operacion' => $datos['operacion']
             ]);
-            if($query){
-                $result['bool']=true;
+            if ($query) {
+                $result['bool'] = true;
             }
-        }catch(PDOException $e){
-            $result['error'] = $e -> getMessage();
+        } catch (PDOException $e) {
+            $result['error'] = $e->getMessage();
         }
         return $result;
     }
 
-
-    public function entrada($datos){
+    public function entrada($datos)
+    {
         $result = [
             'datos' => null,
-            'mensaje'=> null,
+            'mensaje' => null,
             'bool' => false
         ];
-       
-        try{
+
+        try {
             $sql = "SELECT *, tareas.prioridad AS prioridad FROM (tareas LEFT JOIN usuarios ON usuarios.id=tareas.usuario_id) LEFT JOIN categorias ON categorias.id=tareas.categoria_id WHERE tareas.id = $datos";
             $resultquery = $this->conexion->query($sql);
-            if($resultquery){
+            if ($resultquery) {
                 $result['bool'] = true;
                 $result['datos'] = $resultquery->fetchall(PDO::FETCH_ASSOC);
             }
-        }catch(PDOException $e){
-            $result['mensaje'] = $e ->getMessage();
+        } catch (PDOException $e) {
+            $result['mensaje'] = $e->getMessage();
         }
         return $result;
     }
-    
 
-    public function delEntrada($datos){
+    public function delEntrada($datos)
+    {
         $result = [
-            'bool'=> false,
+            'bool' => false,
             'error' => null
         ];
-        try{
+        try {
             $sql = "DELETE FROM tareas WHERE id = $datos";
-            $resultquery = $this->conexion->query($sql);            
-            if($resultquery){
-                $result['bool']=true;
+            $resultquery = $this->conexion->query($sql);
+            if ($resultquery) {
+                $result['bool'] = true;
             }
-        }catch(PDOException $e){
-            $result['error'] = $e -> getMessage();
+        } catch (PDOException $e) {
+            $result['error'] = $e->getMessage();
         }
         return $result;
     }
 
-    public function editar($datos){
+    public function editar($datos)
+    {
         $result = [
             "bool" => false,
             "error" => null
         ];
-        try{
+        try {
             $sql = "UPDATE tareas SET categoria_id= :categoria_id, titulo= :titulo, imagen= :imagen, descripcion= :descripcion, prioridad= :prioridad WHERE id= :id";
-    
+
             $query = $this->conexion->prepare($sql);
-    
+
             $query->execute([
                 'categoria_id' => $datos['categoria_id'],
                 'titulo' => $datos['titulo'],
                 'imagen' => $datos['imagen'],
                 'descripcion' => $datos['descripcion'],
-                'prioridad' => $datos['prioridad'], 
+                'prioridad' => $datos['prioridad'],
                 'id' => $datos['id']
             ]);
-    
-            if($query){
+
+            if ($query) {
                 $result['bool'] = true;
             }
-        } catch(PDOException $e){
+        } catch (PDOException $e) {
             $result['error'] = $e->getMessage();
         }
-        return $result;  
+        return $result;
     }
-    
-
-    }
-
-    
-?>
+}
