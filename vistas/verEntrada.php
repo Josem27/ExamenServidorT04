@@ -55,6 +55,11 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="prioridad" class="label-resaltado">Prioridad:</label><br>
+                        <p><?= $datos['prioridad'] ?></p>
+                    </div>
+
+                    <div class="form-group">
                         <label for="descripcion" class="label-resaltado">Descripción:</label><br>
                         <p><?= $datos['descripcion'] ?></p>
                     </div>

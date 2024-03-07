@@ -133,24 +133,6 @@ class controlador{
         header("Location: index.php");
     }
 
-    public function mostrarLog(){
-        $parametros = [
-            "titulo" => "Logs",
-            "datos" => null,
-            "mensaje" => null
-        ];
-
-        $resultModelo = $this->modelo->mostrarLog();
-        if($resultModelo['bool']){
-            $parametros["datos"] = $resultModelo["datos"];
-            if(isset($_SESSION['logueado'])){                
-    
-                include_once 'vistas/logs.php';
-            }else{
-                header("Location: /index.php");
-            }
-        }
-    }
 
     public function entrada(){
         $parametros = [
@@ -162,11 +144,12 @@ class controlador{
             $datos = $_GET['id'];
             $resultModelo = $this->modelo->entrada($datos);
             if($resultModelo['bool']){
-                $parametros['datos']=$resultModelo['datos'];
+                $parametros['datos'] = $resultModelo['datos'];
                 include_once 'vistas/verEntrada.php';
             }
         }
     }
+    
 
     public function eliminar(){
         $id_entrada = $_GET['id'];
@@ -249,6 +232,49 @@ class controlador{
                 include_once 'vistas/editarEntrada.php';
             }
         }
+    }
+      
+
+    public function generarPDF() {
+        // Obtener todo el listado de entradas
+        $resultModelo = $this->modelo->listado();
+        $entradas = $resultModelo['datos'];
+    
+        // Incluir los archivos de TCPDF localmente
+        require_once 'tcpdf/tcpdf.php';
+    
+        // Crear una instancia de TCPDF
+        $pdf = new TCPDF();
+    
+        // Establecer la ubicación de las fuentes de TCPDF
+        $fontPath = 'ruta/a/la/carpeta/fonts/';
+        TCPDF_FONTS::addTTFfont($fontPath . 'arial.ttf', 'TrueTypeUnicode', '', 32);
+    
+        // Agregar contenido al PDF (ajusta según tus necesidades)
+        $pdf->AddPage();
+        $pdf->SetFont('times', 'B', 16);
+    
+        foreach ($entradas as $entrada) {
+            $pdf->Cell(0, 10, 'Detalles de Entrada', 0, 1, 'C');
+            $pdf->Cell(0, 10, 'Título: ' . $entrada['titulo'], 0, 1);
+            $pdf->Cell(0, 10, 'Descripción: ' . $entrada['descripcion'], 0, 1);
+            $pdf->Cell(0, 10, 'Autor: ' . $entrada['nick'], 0, 1); // Cambia 'nombre' por el nombre correcto de la columna que almacena el nombre del autor
+            $pdf->Cell(0, 10, 'Categoría: ' . $entrada['categoria_id'], 0, 1); // Cambia 'nombre_categoria' por el nombre correcto de la columna que almacena el nombre de la categoría
+            $pdf->Cell(0, 10, 'Fecha de Creación: ' . $entrada['fecha'], 0, 1);
+    
+            // Agregar la imagen al PDF
+            if ($entrada['imagen'] != null) {
+                $imagePath = 'fotos/' . $entrada['imagen']; // Ajusta la ruta de la imagen según sea necesario
+                $pdf->Image($imagePath, 10, 40, 90, 0, '', '', '', false, 300, '', false, false, 0);
+            }
+    
+            // Agregar un salto de página después de cada entrada
+            $pdf->AddPage();
+        }
+    
+        // Salida del PDF
+        $pdf->Output('Listado_de_Entradas.pdf', 'I');
+        exit();
     }
     
     

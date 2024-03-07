@@ -38,10 +38,10 @@ class modelo{
         $offset = $page * $longitudPag;
     
         try{   
-            $sql = "SELECT entradas.*, usuarios.*, categorias.*, entradas.prioridad 
-                    FROM (entradas 
-                    LEFT JOIN usuarios ON usuarios.id = entradas.usuario_id) 
-                    LEFT JOIN categorias ON categorias.id = entradas.categoria_id 
+            $sql = "SELECT tareas.*, usuarios.*, categorias.*, tareas.prioridad 
+                    FROM (tareas 
+                    LEFT JOIN usuarios ON usuarios.id = tareas.usuario_id) 
+                    LEFT JOIN categorias ON categorias.id = tareas.categoria_id 
                     LIMIT $longitudPag OFFSET $offset";
             
             $resultquery = $this->conexion->query($sql);
@@ -51,7 +51,7 @@ class modelo{
                 $result['datos'] = $resultquery->fetchAll(PDO::FETCH_ASSOC);
             }
     
-            $listCount = $this->conexion->query("SELECT COUNT(*) FROM entradas")->fetch()[0];
+            $listCount = $this->conexion->query("SELECT COUNT(*) FROM tareas")->fetch()[0];
             
             if($page > ($listCount / $longitudPag)){
                 $page = 0;
@@ -97,7 +97,7 @@ class modelo{
         ];
     
         try{
-            $sql = "INSERT INTO entradas(usuario_id, categoria_id, titulo, imagen, descripcion, fecha, prioridad) 
+            $sql = "INSERT INTO tareas(usuario_id, categoria_id, titulo, imagen, descripcion, fecha, prioridad) 
                     VALUES (:usuario_id, :categoria_id, :titulo, :imagen, :descripcion, :fecha, :prioridad)";
     
             $query = $this->conexion->prepare($sql);
@@ -164,41 +164,6 @@ class modelo{
         return $result;
     }
 
-    public function mostrarLog(){
-        $result = [
-            "datos" => null,
-            "mensaje" => null,
-            "bool" => false
-        ];
-
-        $page = 0;
-        $longitudPag = 10;
-        
-        if(isset($_GET['page'])&& is_numeric($_GET['page'])){
-            $page = $_GET['page'];
-        }
-        $offset = $page * $longitudPag;
-
-        try{   
-            $sql = "SELECT * FROM logs LIMIT $longitudPag OFFSET $offset";
-            $resultquery = $this->conexion->query($sql);
-            if($resultquery){
-                $result['bool'] = true;
-                $result['datos'] = $resultquery->fetchAll(PDO::FETCH_ASSOC);
-            }
-
-            $listCount = $this->conexion->query("SELECT COUNT(*) FROM logs")->fetch()[0];
-            if($page>($listCount/$longitudPag)){
-                $page = 0;
-            }
-            $result['paginas'] = $listCount;
-            $result['offset'] = $offset;
-            $result['longitudPag']=$longitudPag;
-        }catch(PDOException $e){
-            $result['mensaje'] = $e->getMessage();
-        }
-        return $result;
-    }
 
     public function entrada($datos){
         $result = [
@@ -208,7 +173,7 @@ class modelo{
         ];
        
         try{
-            $sql = "SELECT * FROM (entradas LEFT JOIN usuarios ON usuarios.id=entradas.usuario_id) LEFT JOIN categorias ON categorias.id=entradas.categoria_id WHERE entradas.id = $datos";
+            $sql = "SELECT *, tareas.prioridad AS prioridad FROM (tareas LEFT JOIN usuarios ON usuarios.id=tareas.usuario_id) LEFT JOIN categorias ON categorias.id=tareas.categoria_id WHERE tareas.id = $datos";
             $resultquery = $this->conexion->query($sql);
             if($resultquery){
                 $result['bool'] = true;
@@ -219,6 +184,7 @@ class modelo{
         }
         return $result;
     }
+    
 
     public function delEntrada($datos){
         $result = [
@@ -226,7 +192,7 @@ class modelo{
             'error' => null
         ];
         try{
-            $sql = "DELETE FROM entradas WHERE id = $datos";
+            $sql = "DELETE FROM tareas WHERE id = $datos";
             $resultquery = $this->conexion->query($sql);            
             if($resultquery){
                 $result['bool']=true;
@@ -243,7 +209,7 @@ class modelo{
             "error" => null
         ];
         try{
-            $sql = "UPDATE entradas SET categoria_id= :categoria_id, titulo= :titulo, imagen= :imagen, descripcion= :descripcion, prioridad= :prioridad WHERE id= :id";
+            $sql = "UPDATE tareas SET categoria_id= :categoria_id, titulo= :titulo, imagen= :imagen, descripcion= :descripcion, prioridad= :prioridad WHERE id= :id";
     
             $query = $this->conexion->prepare($sql);
     

@@ -7,7 +7,15 @@
 </head>
 <body>    
     <?php include_once 'includes/menu.php'?>
-    
+    <!-- Formulario HTML para buscar tareas -->
+<form action="index.php" method="get">
+    <div class="form-group">
+        <input type="text" name="buscar" class="form-control" placeholder="Buscar por título">
+    </div>
+    <button type="submit" class="btn btn-primary">Buscar</button>
+    <!-- No le eches cuenta a esto, que lo fui a hacer y al final lo descarté -->
+</form>
+
     <div class="container">
         <table class="table">
             <thead>
