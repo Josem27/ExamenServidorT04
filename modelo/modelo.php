@@ -5,7 +5,7 @@ class modelo
     private $host = "localhost";
     private $user = "root";
     private $pass = "";
-    private $db = "dbblog";
+    private $db = "bdtodolist";
 
     //Constructor que inicializa la conexion
     public function __construct()
